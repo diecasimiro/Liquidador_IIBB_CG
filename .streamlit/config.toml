@@ -1,0 +1,7 @@
+[theme]
+# Paleta CG Consultoría Integral
+primaryColor     = "#8FADB8"   # azul grisáceo suave del logo
+backgroundColor  = "#1B2838"   # azul marino oscuro del fondo del logo
+secondaryBackgroundColor = "#243447"  # marino un poco más claro para widgets/sidebar
+textColor        = "#D4E8EE"   # blanco azulado para texto legible sobre fondo oscuro
+font             = "sans serif"

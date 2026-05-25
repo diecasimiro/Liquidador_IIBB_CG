@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: iibb-cm
+    runtime: python
+    buildCommand: pip install -r requirements.txt && alembic upgrade head && python -c "from iibb.seed.runner import main; main()"
+    startCommand: streamlit run iibb/main.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    envVars:
+      - key: IIBB_DB_DIR
+        value: /data
+      - key: PYTHON_VERSION
+        value: 3.11.0
+    disk:
+      name: iibb-data
+      mountPath: /data
+      sizeGB: 1
