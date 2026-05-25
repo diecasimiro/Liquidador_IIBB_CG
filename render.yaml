@@ -3,7 +3,7 @@ services:
     name: iibb-cm
     runtime: python
     buildCommand: pip install -e . && alembic upgrade head && python -c "from iibb.seed.runner import main; main()"
-    startCommand: streamlit run iibb/main.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
+    startCommand: PYTHONPATH=/opt/render/project/src streamlit run iibb/main.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
     envVars:
       - key: IIBB_DB_DIR
         value: /data
