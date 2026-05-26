@@ -17,6 +17,13 @@ TIPOS_NOTA_CREDITO = {"nota de crédito", "nota de credito", "nc"}
 _CODIGOS_EXPORTACION = {"019", "020", "021", "19", "20", "21"}
 
 
+def _es_tipo_c(tipo: str) -> bool:
+    """Detecta comprobantes tipo C (Monotributistas, sin IVA discriminado).
+    El total facturado ES la base imponible para IIBB."""
+    partes = tipo.strip().lower().split()
+    return len(partes) >= 2 and partes[-1] == "c"
+
+
 @dataclass
 class ComprobanteRow:
     fecha: date | None
@@ -121,6 +128,9 @@ def import_mis_comprobantes_emitidos(path: str | Path) -> list[ComprobanteRow]:
             total = parse_decimal(row[27]) if len(row) > 27 else Decimal("0")
             signo = -1 if _es_nota_credito(tipo) else 1
             es_exp = _es_exportacion(tipo)
+            # Factura C (Monotributistas): sin IVA discriminado → el total ES la base de IIBB
+            if _es_tipo_c(tipo) and neto_gravado == Decimal("0"):
+                neto_gravado = total
         except Exception as e:
             logger.warning(f"Fila {i} ignorada por error: {e}")
             continue
