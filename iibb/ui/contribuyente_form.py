@@ -130,6 +130,8 @@ def render_contribuyente_form(modo: str = "nuevo", contribuyente_id: int | None 
                 "tipo_contribuyente": contrib_actual.tipo_contribuyente or "Resto",
                 "notas": contrib_actual.notas or "",
                 "carpeta_drive": contrib_actual.carpeta_drive or "",
+                "xubio_client_id": contrib_actual.xubio_client_id or "",
+                "xubio_secret_id": contrib_actual.xubio_secret_id or "",
             }
         else:
             campos_actuales = None
@@ -238,6 +240,22 @@ def _seccion_datos_basicos(key, modo, campos, juris_catalogo, contrib_id):
             help="Ruta local de la carpeta sincronizada (Google Drive, OneDrive, etc.). "
                  "Los Excel se guardarán ahí al usar 'Exportar al Drive'.",
         )
+        st.markdown("**🔗 Integración Xubio** *(opcional)*")
+        col_xc, col_xs = st.columns(2)
+        with col_xc:
+            xubio_client_id = st.text_input(
+                "Xubio Client ID",
+                value=v.get("xubio_client_id", ""),
+                placeholder="Tu Client ID de la API de Xubio",
+            )
+        with col_xs:
+            xubio_secret_id = st.text_input(
+                "Xubio Secret ID",
+                value=v.get("xubio_secret_id", ""),
+                placeholder="Tu Secret ID de la API de Xubio",
+                type="password",
+            )
+
         notas = st.text_area("Notas internas", value=v.get("notas", ""), height=80)
 
         submitted = st.form_submit_button(
@@ -269,6 +287,8 @@ def _seccion_datos_basicos(key, modo, campos, juris_catalogo, contrib_id):
                 "tipo_contribuyente": tipo,
                 "notas": notas.strip() or None,
                 "carpeta_drive": carpeta_drive.strip() or None,
+                "xubio_client_id": xubio_client_id.strip() or None,
+                "xubio_secret_id": xubio_secret_id.strip() or None,
             }
             st.success("✅ Datos básicos guardados. Continuá con las pestañas siguientes.")
 
@@ -288,6 +308,8 @@ def _seccion_datos_basicos(key, modo, campos, juris_catalogo, contrib_id):
                     tipo_contribuyente=tipo,
                     notas=notas.strip() or None,
                     carpeta_drive=carpeta_drive.strip() or None,
+                    xubio_client_id=xubio_client_id.strip() or None,
+                    xubio_secret_id=xubio_secret_id.strip() or None,
                 )
                 session.commit()
                 st.success("✅ Datos actualizados correctamente.")

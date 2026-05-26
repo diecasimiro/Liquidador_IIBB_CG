@@ -23,6 +23,8 @@ class Contribuyente(Base):
     activo: Mapped[bool] = mapped_column(default=True)
     notas: Mapped[str | None] = mapped_column(String(2000))
     carpeta_drive: Mapped[str | None] = mapped_column(String(1000))
+    xubio_client_id: Mapped[str | None] = mapped_column(String(200))
+    xubio_secret_id: Mapped[str | None] = mapped_column(String(200))
     creado_en: Mapped[datetime] = mapped_column(DateTime, server_default=func.now())
     modificado_en: Mapped[datetime] = mapped_column(DateTime, server_default=func.now(), onupdate=func.now())
 

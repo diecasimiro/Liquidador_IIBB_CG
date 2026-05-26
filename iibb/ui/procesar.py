@@ -117,6 +117,37 @@ def render_procesar():
 
         upload_comp = None
         bienes_uso_key = f"bienes_uso_{contrib_id}_{anio}_{mes}"
+        xubio_comp_key = f"xubio_comp_{contrib_id}_{anio}_{mes}"
+
+        # ── Xubio (solo si el contribuyente tiene credenciales) ────────────────
+        tiene_xubio = bool(contrib.xubio_client_id and contrib.xubio_secret_id)
+        if tiene_xubio:
+            with st.expander("🔗 TRAER VENTAS DESDE XUBIO", expanded=False):
+                st.markdown(
+                    "Importa automáticamente los comprobantes emitidos del período "
+                    "directamente desde tu cuenta de Xubio."
+                )
+                if st.button("⬇️ Traer comprobantes de Xubio", type="primary",
+                             key=f"btn_xubio_{anio}_{mes}"):
+                    with st.spinner("Conectando con Xubio..."):
+                        try:
+                            from iibb.importers.xubio import importar_comprobantes_xubio
+                            comp_xubio = importar_comprobantes_xubio(
+                                contrib.xubio_client_id,
+                                contrib.xubio_secret_id,
+                                anio, mes,
+                            )
+                            st.session_state[xubio_comp_key] = comp_xubio
+                            st.rerun()
+                        except Exception as e:
+                            st.error(f"Error al conectar con Xubio: {e}")
+
+                if xubio_comp_key in st.session_state:
+                    n = len(st.session_state[xubio_comp_key])
+                    st.success(f"✅ {n} comprobantes listos desde Xubio — se usarán al calcular.")
+                    if st.button("🗑️ Descartar y usar archivo", key=f"discard_xubio_{anio}_{mes}"):
+                        st.session_state.pop(xubio_comp_key, None)
+                        st.rerun()
 
         with st.expander("📥 IMPORTAR MIS COMPROBANTES", expanded=False):
             st.markdown(
@@ -287,6 +318,7 @@ def render_procesar():
                 juris_inscriptas=juris_inscriptas,
                 juris_nombres=juris_nombres,
                 bienes_uso_str=st.session_state.get(bienes_uso_key, "0"),
+                comprobantes_override=st.session_state.get(xubio_comp_key),
             )
 
     finally:
@@ -297,6 +329,7 @@ def _ejecutar_calculo(
     session, contrib, anio, mes, upload_comp,
     ded_state, coefs, alics, juris_inscriptas, juris_nombres,
     bienes_uso_str: str = "0",
+    comprobantes_override: list | None = None,
 ):
     from iibb.calculo.cm03 import calcular_cm03, q2
 
@@ -311,7 +344,19 @@ def _ejecutar_calculo(
             exportaciones_neto = Decimal("0")
             ingresos_brutos = Decimal("0")
             iva_total = Decimal("0")
-            if upload_comp:
+            if comprobantes_override is not None:
+                comprobantes = comprobantes_override
+                resumen = summarize_comprobantes(comprobantes)
+                exportaciones_neto = resumen["exportaciones_neto"]
+                ingresos_brutos = resumen["neto_gravado_bruto"]
+                iva_total = resumen["iva_total"]
+                ingresos_totales = q2(resumen["neto_gravado_neto"] - bienes_uso)
+                logs.info(
+                    f"Xubio: {resumen['cant_facturas']} facturas, "
+                    f"{resumen['cant_notas_credito']} NC — "
+                    f"Base imponible IIBB: ${ingresos_totales:,.2f}"
+                )
+            elif upload_comp:
                 tmp_comp = _guardar_upload_temporal(upload_comp)
                 try:
                     comprobantes = import_mis_comprobantes_emitidos(tmp_comp)
