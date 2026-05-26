@@ -6,6 +6,7 @@ import streamlit as st
 from iibb.db import get_session
 from iibb.models.usuario import Usuario
 from iibb.service.auth import crear_usuario, cambiar_password, autenticar
+from iibb.service.invitacion import crear_invitacion, url_invitacion
 
 
 def render_usuarios():
@@ -98,6 +99,34 @@ def render_usuarios():
                     st.rerun()
 
         st.markdown("---")
+
+    # ── Invitar usuario por link ────────────────────────────────────────────
+    st.subheader("Invitar usuario por link")
+    st.caption("Generá un link de invitación válido por 7 días. El invitado elige su propio nombre y contraseña.")
+
+    with st.form("form_invitar", clear_on_submit=True):
+        email_inv = st.text_input("Correo del invitado", placeholder="ana@estudio.com")
+        submitted_inv = st.form_submit_button("Generar link de invitación", type="primary")
+
+    if submitted_inv:
+        if not email_inv.strip():
+            st.error("Ingresá un correo.")
+        else:
+            tenant_id = st.session_state.get("usuario_tenant_id", 1)
+            session = get_session()
+            try:
+                inv = crear_invitacion(session, email=email_inv, tenant_id=tenant_id)
+                session.commit()
+                link = url_invitacion(inv.token)
+                st.success("Link generado. Copialo y envialo al invitado:")
+                st.code(link, language=None)
+                st.caption("El link expira en 7 días y solo puede usarse una vez.")
+            except Exception as e:
+                st.error(f"Error: {e}")
+            finally:
+                session.close()
+
+    st.markdown("---")
 
     # ── Crear nuevo usuario ─────────────────────────────────────────────────
     st.subheader("Crear nuevo usuario")

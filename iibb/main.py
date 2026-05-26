@@ -100,6 +100,13 @@ if "pantalla" not in st.session_state:
 if "usuario_id" not in st.session_state:
     st.session_state["usuario_id"] = None
 
+# ── Invitación por link (?invite=TOKEN) ────────────────────────────────────
+_invite_token = st.query_params.get("invite")
+if _invite_token and st.session_state["usuario_id"] is None:
+    from iibb.ui.registro import render_registro
+    render_registro(_invite_token)
+    st.stop()
+
 # ── Verificar sesión ────────────────────────────────────────────────────────
 pantalla = st.session_state["pantalla"]
 logueado = st.session_state["usuario_id"] is not None

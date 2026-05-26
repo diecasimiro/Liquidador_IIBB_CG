@@ -10,6 +10,7 @@ from iibb.models.contribuyente import (
 from iibb.models.periodo import Periodo, ComprobanteEmitido, SaldoAFavorAnterior
 from iibb.models.deduccion import Deduccion, ResultadoJurisdiccion
 from iibb.models.usuario import Usuario
+from iibb.models.invitacion import Invitacion
 
 __all__ = [
     "Base",
@@ -27,4 +28,5 @@ __all__ = [
     "Deduccion",
     "ResultadoJurisdiccion",
     "Usuario",
+    "Invitacion",
 ]
