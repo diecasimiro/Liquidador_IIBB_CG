@@ -2,7 +2,7 @@ from logging.config import fileConfig
 from sqlalchemy import engine_from_config, pool
 from alembic import context
 
-from iibb.db import get_db_path
+from iibb.db import get_db_url
 from iibb.models import Base  # imports all models so metadata is populated
 
 config = context.config
@@ -14,7 +14,7 @@ target_metadata = Base.metadata
 
 
 def get_url():
-    return f"sqlite:///{get_db_path()}"
+    return get_db_url()
 
 
 def run_migrations_offline() -> None:

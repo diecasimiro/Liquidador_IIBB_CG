@@ -5,13 +5,15 @@ services:
     buildCommand: pip install .
     startCommand: alembic upgrade head && python -c "from iibb.seed.runner import main; main()" && streamlit run iibb/main.py --server.port $PORT --server.address 0.0.0.0 --server.headless true
     envVars:
-      - key: IIBB_DB_DIR
-        value: /data
+      - key: DATABASE_URL
+        fromDatabase:
+          name: iibb-db
+          property: connectionString
       - key: PYTHON_VERSION
         value: 3.11.0
       - key: APP_URL
-        value: https://iibb-cm.onrender.com
-    disk:
-      name: iibb-data
-      mountPath: /data
-      sizeGB: 1
+        value: https://liquidador-iibb-cg.onrender.com
+
+databases:
+  - name: iibb-db
+    plan: free
