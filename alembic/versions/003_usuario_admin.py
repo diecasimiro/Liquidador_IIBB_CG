@@ -14,9 +14,9 @@ depends_on = None
 
 
 def upgrade():
-    op.add_column("usuario", sa.Column("es_admin", sa.Boolean(), nullable=False, server_default="0"))
+    op.add_column("usuario", sa.Column("es_admin", sa.Boolean(), nullable=False, server_default="false"))
     # Marcar como admin al usuario de Diego
-    op.execute("UPDATE usuario SET es_admin = 1 WHERE email = 'dcasimiro@cgestudiocontable.com'")
+    op.execute("UPDATE usuario SET es_admin = true WHERE email = 'dcasimiro@cgestudiocontable.com'")
 
 
 def downgrade():
